@@ -1,31 +1,59 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+@model Sales.backend.Models.ExcelMergeViewModel
+@{
+    ViewBag.Title = "Conciliacion de trabajadores";
 }
 
 <div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+    <h1>Conciliacion de trabajadores</h1>
+    <p class="lead">Sube los Excel de trabajadores, ultimo dia laborado y marcaciones para generar un archivo consolidado con la columna Estado.</p>
 </div>
 
+@if (Model != null && Model.Errores.Any())
+{
+    <div class="alert alert-danger">
+        <strong>No se pudo generar el archivo:</strong>
+        <ul>
+            @foreach (var error in Model.Errores)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Post, new { enctype = "multipart/form-data", @class = "panel panel-default" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="panel-heading">
+        <h2 class="panel-title">Cargar archivos .xlsx</h2>
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+            <label for="Trabajadores">Excel de trabajadores</label>
+            <input type="file" id="Trabajadores" name="Trabajadores" class="form-control" accept=".xlsx" required />
+            <span class="help-block">Debe incluir una columna de identificacion como Documento, DNI, Cedula, Id, Codigo o Legajo.</span>
+        </div>
+        <div class="form-group">
+            <label for="UltimoDiaLaborado">Excel de ultimo dia laborado y labores</label>
+            <input type="file" id="UltimoDiaLaborado" name="UltimoDiaLaborado" class="form-control" accept=".xlsx" required />
+            <span class="help-block">Debe incluir la misma identificacion y una columna Actividad/Labor/Estado para trabajadores sin marcaciones.</span>
+        </div>
+        <div class="form-group">
+            <label for="Marcaciones">Excel de marcaciones</label>
+            <input type="file" id="Marcaciones" name="Marcaciones" class="form-control" accept=".xlsx" required />
+            <span class="help-block">Si el trabajador aparece aqui, el Estado exportado sera ACTIVO.</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg">Exportar Excel consolidado</button>
+    </div>
+}
+
 <div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
+    <div class="col-md-12">
+        <h3>Reglas de estado</h3>
+        <ul>
+            <li><strong>ACTIVO:</strong> el trabajador tiene al menos una marcacion.</li>
+            <li><strong>Actividad:</strong> si no tiene marcaciones, se toma el valor de la columna Actividad del Excel de ultimo dia laborado.</li>
+            <li><strong>SIN MARCACIONES:</strong> si no tiene marcaciones ni actividad informada.</li>
+        </ul>
     </div>
 </div>
